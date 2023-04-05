@@ -4,17 +4,21 @@ import {
   greyBorder,
   greyDark,
   greyDisabled,
+  greyLight,
   white,
 } from "../../../../colors";
 
 export const CalendarDayContainerStyled = styled.div`
   border: 1.5px solid ${greyBorder};
   min-height: 11.5rem;
+  cursor: pointer;
+  height: 100%;
+  background-color: ${({ active }) => (active ? "lightblue" : white)};
 `;
 
 export const MetaBlockStyled = styled.div`
   font-size: 1.5rem;
-  padding: .7rem;
+  padding: 0.7rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -34,3 +38,5 @@ export const DayStyled = styled.h4`
     disabled ? greyDark : today ? white : black};
   border-radius: 50%;
 `;
+
+
