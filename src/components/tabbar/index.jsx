@@ -2,7 +2,7 @@ import React from "react";
 import { TabbarContainerStyled, TabbarItem } from "./styled";
 import { useState } from "react";
 
-export default function Tabar({ options = [], value, onChange }) {
+export default function Tabar({ options = [], value, onChange,S }) {
   const [active, setActive] = useState(value || options[0]);
 
   console.log({active})
@@ -17,6 +17,7 @@ export default function Tabar({ options = [], value, onChange }) {
     <TabbarContainerStyled>
       {options.map((d) => (
         <TabbarItem
+          S={S}
           onClick={() => handleOnChange(d)}
           active={active.value === d.value}
         >

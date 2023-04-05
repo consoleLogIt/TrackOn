@@ -1,0 +1,53 @@
+{
+  "hash": "9b144419",
+  "browserHash": "44b754c1",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "f98927d6",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "a50dda9d",
+      "needsInterop": true
+    },
+    "styled-components": {
+      "src": "../../node_modules/styled-components/dist/styled-components.browser.esm.js",
+      "file": "styled-components.js",
+      "fileHash": "3d228531",
+      "needsInterop": false
+    },
+    "calendar-base": {
+      "src": "../../node_modules/calendar-base/dist/index.js",
+      "file": "calendar-base.js",
+      "fileHash": "b1ed5145",
+      "needsInterop": false
+    },
+    "@react-spring/web": {
+      "src": "../../node_modules/@react-spring/web/dist/esm/index.js",
+      "file": "@react-spring_web.js",
+      "fileHash": "4a2142ae",
+      "needsInterop": false
+    },
+    "phosphor-react": {
+      "src": "../../node_modules/phosphor-react/dist/index.esm.js",
+      "file": "phosphor-react.js",
+      "fileHash": "45587c02",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-EW3LUIW7": {
+      "file": "chunk-EW3LUIW7.js"
+    },
+    "chunk-AYRJNZXD": {
+      "file": "chunk-AYRJNZXD.js"
+    },
+    "chunk-GKWPUQBP": {
+      "file": "chunk-GKWPUQBP.js"
+    }
+  }
+}

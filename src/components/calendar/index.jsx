@@ -135,6 +135,8 @@ export default function Calendar({ layout }) {
     monthDays.findIndex((d) => d.day === today.getDate())
   );
 
+  const [showEventCreaterOnDay, setShowEventCreaterOnDay] = useState(false);
+
   const [springs, api] = useSpring(() => ({ from: { x: 0 } }));
 
   const AnimatedCalendar = animated(CalendarDaysWrapperStyled);
@@ -229,6 +231,8 @@ export default function Calendar({ layout }) {
 
   console.log({ monthDays, currentIndex, fromIndex, toIndex });
 
+  console.log({ showEventCreaterOnDay });
+
   return (
     <CalendarContainerStyled>
       <CalendarHeaderStyled>
@@ -264,6 +268,13 @@ export default function Calendar({ layout }) {
               month: today.getMonth(),
               year: today.getFullYear(),
             })}
+            onClick={() => setShowEventCreaterOnDay(d)}
+            onCloseCreator={() => setShowEventCreaterOnDay(false)}
+            active={
+              showEventCreaterOnDay
+                ? isEqualDate(showEventCreaterOnDay, d)
+                : false
+            }
           />
         ))}
       </AnimatedCalendar>
