@@ -212,6 +212,8 @@ export default function Calendar({ layout }) {
     }
   };
 
+  //
+
   const fromIndex =
     layout.value === "day"
       ? currentIndex
