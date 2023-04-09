@@ -6,6 +6,7 @@ border: 2px solid ${greyBorder};
 flex-grow: 1;
 display: flex;
 flex-direction:column;
+overflow: hidden;
 `
 
 export const CalendarHeaderStyled = styled.div`

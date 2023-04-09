@@ -8,6 +8,7 @@ import {
 } from "./styled";
 import { Calendar as CalenderConstructor } from "calendar-base";
 import { animated, useSpring } from "@react-spring/web";
+import { greyBorder } from "../../colors";
 
 const months = [
   "January",
@@ -229,10 +230,6 @@ export default function Calendar({ layout }) {
       ? fromIndex + 7
       : undefined;
 
-  console.log({ monthDays, currentIndex, fromIndex, toIndex });
-
-  console.log({ showEventCreaterOnDay });
-
   return (
     <CalendarContainerStyled>
       <CalendarHeaderStyled>
@@ -257,12 +254,15 @@ export default function Calendar({ layout }) {
           })}
         </animated.h2>
       </CalendarHeaderStyled>
+
       <AnimatedCalendar day={layout.value === "day"} style={springs}>
-        {monthDays.slice(fromIndex, toIndex).map((d) => (
+        {monthDays.slice(fromIndex, toIndex).map((d, i) => (
           <CalendarDay
-            // disabled={d.siblingMonth}
             week={weeks[d.weekDay]}
+            showTimeDivision={layout.value === "week" || layout.value === "day"}
+            showTime={i === 0}
             day={d.day}
+            currentHour={today.getHours()}
             today={isEqualDate(d, {
               day: today.getDate(),
               month: today.getMonth(),
