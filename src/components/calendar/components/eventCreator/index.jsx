@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TextInput from "../../../inputs";
 import Tabar from "../../../tabbar";
 import Button from "../../../buttons";
 import { EventCreatorContainerStyled } from "./styled";
+import { animated, useSpring } from "@react-spring/web";
+
+const AnimatedEventCreator = animated(EventCreatorContainerStyled);
 
 export default function EventCreator({
   value,
@@ -10,19 +13,40 @@ export default function EventCreator({
   onClose,
   onSubmit,
 }) {
+  const [springObj, setSpringObj] = useState({
+    from: { x: 80 },
+    to: { x: 100 },
+  });
+
   const intialDS = {
     title: "",
     type: { display: "Event", value: "event" },
   };
 
-  const [eventData, setEventData] = useState(intialDS||value);
+  const ref = useRef();
+
+  useEffect(() => {
+    const screenWidth = screen.width;
+    const right = ref.current.getBoundingClientRect().right;
+
+    if (right > screenWidth) {
+      setSpringObj({
+        from: { x: -80 },
+        to: { x: -100 },
+      });
+    }
+  }, []);
+
+  const spring = useSpring(springObj);
+
+  const [eventData, setEventData] = useState(intialDS || value);
 
   const handleOnChange = (id, value) => {
     setEventData((prev) => ({ ...prev, [id]: value }));
   };
 
   return (
-    <EventCreatorContainerStyled>
+    <AnimatedEventCreator ref={ref} style={spring}>
       <TextInput
         placeholder={placeholder}
         value={eventData["title"]}
@@ -45,6 +69,6 @@ export default function EventCreator({
         <Button onClick={() => onSubmit(eventData)}>Submit</Button>
         <Button onClick={onClose}>Cancel</Button>
       </div>
-    </EventCreatorContainerStyled>
+    </AnimatedEventCreator>
   );
 }

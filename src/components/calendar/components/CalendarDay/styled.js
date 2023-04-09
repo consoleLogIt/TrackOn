@@ -16,12 +16,22 @@ export const CalendarDayContainerStyled = styled.div`
   background-color: ${({ active }) => (active ? "lightblue" : white)};
 `;
 
+export const TimeBlockContainerStyled = styled.div`
+  border-bottom: 1px solid ${greyBorder};
+  border-top: ${({ borderTop }) =>
+    borderTop ? `1px solid ${greyBorder}` : null};
+  height: 4rem;
+  position: relative;
+  padding: 0.5rem;
+`;
+
 export const MetaBlockStyled = styled.div`
   font-size: 1.5rem;
   padding: 0.7rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-height: 2rem;
 `;
 
 export const DayStyled = styled.h4`
@@ -38,5 +48,3 @@ export const DayStyled = styled.h4`
     disabled ? greyDark : today ? white : black};
   border-radius: 50%;
 `;
-
-

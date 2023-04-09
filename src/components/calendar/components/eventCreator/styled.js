@@ -9,7 +9,7 @@ export const EventCreatorContainerStyled = styled.div`
   gap:2rem;
   
   top: -20%;
-  left: 50%;
+  /* left: 50%; */
   height: 20rem;
   background: white;
   z-index: 2;
