@@ -20,6 +20,7 @@ export const CalendarDaysWrapperStyled = styled.div`
 display: grid;
 grid-template-columns: ${({day})=>day?"1fr":"repeat(7, 1fr)"};
 flex:1;
+position: relative;
 `
 
 
