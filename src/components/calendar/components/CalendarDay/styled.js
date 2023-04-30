@@ -13,7 +13,7 @@ export const CalendarDayContainerStyled = styled.div`
   min-height: 11.5rem;
   cursor: pointer;
   height: 100%;
-  background-color: ${({ active }) => (active ? "lightblue" : white)};
+  /* background-color: ${({ active }) => (active ? "lightblue" : white)}; */
 `;
 
 export const TimeBlockContainerStyled = styled.div`
@@ -22,7 +22,9 @@ export const TimeBlockContainerStyled = styled.div`
     borderTop ? `1px solid ${greyBorder}` : null};
   height: 4rem;
   position: relative;
-  padding: 0.5rem;
+  /* padding: 0.5rem; */
+  background-color: ${({ active }) => (active ? "lightblue" : white)};
+
 `;
 
 export const MetaBlockStyled = styled.div`
@@ -31,7 +33,7 @@ export const MetaBlockStyled = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-height: 2rem;
+  /* max-height: 2rem; */
 `;
 
 export const DayStyled = styled.h4`

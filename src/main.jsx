@@ -10,6 +10,7 @@ body{
 }
 
   *{
+    box-sizing: border-box;
     font-size: 62.5%;
     font-family: "noto_sans";
   }

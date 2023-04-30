@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useRef } from "react";
 import Button from "../buttons";
 import CalendarDay from "./components/CalendarDay";
 import {
@@ -8,135 +8,34 @@ import {
 } from "./styled";
 import { Calendar as CalenderConstructor } from "calendar-base";
 import { animated, useSpring } from "@react-spring/web";
-import { greyBorder } from "../../colors";
+import EventCreator from "./components/eventCreator";
+import { weeks } from "./constants";
+import { getText, getMonthAndYear, isEqualDate } from "./utils";
 
-const months = [
-  "January",
-  "Febuary",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-const monthsShort = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
-const weeks = ["Su", "Mon", "Tue", "Wed", "Thu", "Fri", "Sa"];
-
-// const handleArrowClick = ({isRight}) => {
-
-//   const min = 0;
-//   const max = monthDays.length
-
-//   if(isRight){
-
-//     let uptoIndex = currentIndex
-
-//     if(layout.value==="week"){
-//       uptoIndex+=7;
-//     }
-//     else{
-
-//     }
-
-//     api.start({ from: { x: 100 }, to: { x: 0 } });
-//     setCurrentIndex(
-//       prev => prev+1
-//     );
-
-//   }
-//   else{
-//     // api.start({ from: { x: -100 }, to: { x: 0 } });
-//     // setCurrentDate(
-//     //   (prev) => new Date(prev.getFullYear(), prev.getMonth(), prev.getDay())
-//     // );
-
-//   }
-// }
-
-const getMonthAndYear = ({ fromIndex, toIndex, monthDays, layout }) => {
-  if (toIndex === undefined) {
-    const { month, year } = monthDays[parseInt(monthDays.length / 2)];
-    return { month, year };
-  } else if (layout.value === "day") {
-    const { month: fromMonth, year: fromYear } = monthDays[fromIndex];
-    return { month: fromMonth, year: fromYear };
-  } else {
-    const { month: fromMonth, year: fromYear } = monthDays[fromIndex];
-    const { month: toMonth, year: toYear } = monthDays[toIndex];
-
-    const returnValue = {};
-    returnValue.month = fromMonth;
-    returnValue.year = fromYear;
-
-    if (fromMonth !== toMonth) {
-      returnValue.monthExtra = toMonth;
-    }
-
-    if (fromYear !== toYear) {
-      returnValue.yearExtra = toYear;
-    }
-
-    return returnValue;
-  }
-};
-
-const isEqualDate = (date1, date2) => {
-  return (
-    date1.day === date2.day &&
-    date1.month === date2.month &&
-    date1.year === date2.year
-  );
-};
-
-// case 1:  month year
-// case 2 : month-monthExtra year
-// case 3: month year - monthExtra yearExtra
-// case 4: month year - yearExtra
-
-const getText = ({ month, monthExtra, year, yearExtra }) => {
-  if ((monthExtra || monthExtra === 0) && yearExtra) {
-    return `${monthsShort[month]} ${year} - ${monthsShort[monthExtra]} ${yearExtra}`;
-  } else if (yearExtra) {
-    return `${monthsShort[month]} ${year} - ${yearExtra}`;
-  } else if (monthExtra) {
-    return `${monthsShort[month]} - ${monthsShort[monthExtra]} ${year}`;
-  } else {
-    return `${monthsShort[month]} ${year}`;
-  }
-};
-
-export default function Calendar({ layout }) {
+export default function Calendar({ layout, localState, setLocalState }) {
   const calendarInstance = new CalenderConstructor({ siblingMonths: true });
   const today = new Date();
+
+  const calendarContainerRef = useRef();
 
   const [monthDays, setMonthDays] = useState(
     calendarInstance.getCalendar(today.getFullYear(), today.getMonth())
   );
   const [currentIndex, setCurrentIndex] = useState(
-    monthDays.findIndex((d) => d.day === today.getDate())
+    monthDays.findIndex((d) =>
+      isEqualDate(d, {
+        day: today.getDate(),
+        month: today.getMonth(),
+        year: today.getFullYear(),
+      })
+    )
   );
 
-  const [showEventCreaterOnDay, setShowEventCreaterOnDay] = useState(false);
+  const [eventCreator, setEventCreator] = useState({
+    show: false,
+    event: {},
+    style: {},
+  });
 
   const [springs, api] = useSpring(() => ({ from: { x: 0 } }));
 
@@ -215,7 +114,27 @@ export default function Calendar({ layout }) {
     }
   };
 
-  //
+  const handleOnClick = (e, id, time) => {
+    const elem = e.target;
+
+    const parentContainer = calendarContainerRef.current;
+
+    const targetRect = elem.getBoundingClientRect();
+    const parentRect = parentContainer.getBoundingClientRect();
+
+    setEventCreator({
+      show: true,
+      style: {
+        top: targetRect.top - parentRect.top,
+        left: targetRect.left - parentRect.left,
+      },
+      event: {
+        id,
+        timeRange: [`${time}:00`, `${time + 1}:00`],
+        color: "blue",
+      },
+    });
+  };
 
   const fromIndex =
     layout.value === "day"
@@ -229,6 +148,8 @@ export default function Calendar({ layout }) {
       : layout.value === "week"
       ? fromIndex + 7
       : undefined;
+
+  // console.log({ monthDays, toIndex, fromIndex });
 
   return (
     <CalendarContainerStyled>
@@ -255,28 +176,63 @@ export default function Calendar({ layout }) {
         </animated.h2>
       </CalendarHeaderStyled>
 
-      <AnimatedCalendar day={layout.value === "day"} style={springs}>
-        {monthDays.slice(fromIndex, toIndex).map((d, i) => (
-          <CalendarDay
-            week={weeks[d.weekDay]}
-            showTimeDivision={layout.value === "week" || layout.value === "day"}
-            showTime={i === 0}
-            day={d.day}
-            currentHour={today.getHours()}
-            today={isEqualDate(d, {
-              day: today.getDate(),
-              month: today.getMonth(),
-              year: today.getFullYear(),
-            })}
-            onClick={() => setShowEventCreaterOnDay(d)}
-            onCloseCreator={() => setShowEventCreaterOnDay(false)}
-            active={
-              showEventCreaterOnDay
-                ? isEqualDate(showEventCreaterOnDay, d)
-                : false
-            }
+      <AnimatedCalendar
+        ref={calendarContainerRef}
+        day={layout.value === "day"}
+        style={springs}
+      >
+        {monthDays.slice(fromIndex, toIndex).map((d, i) => {
+          const uniqueId = `${d.day}_${d.month}_${d.year}`;
+
+          return (
+            <CalendarDay
+              week={weeks[d.weekDay]}
+              showTimeDivision={
+                layout.value === "week" || layout.value === "day"
+              }
+              showTime={i === 0} // show time for first only
+              day={d.day}
+              currentHour={today.getHours()}
+              id={uniqueId}
+              today={isEqualDate(d, {
+                day: today.getDate(),
+                month: today.getMonth(),
+                year: today.getFullYear(),
+              })}
+              onClick={handleOnClick}
+              onCloseCreator={() => setEventCreator(false)}
+              active={eventCreator.show ? eventCreator.event?.id : false}
+              events={localState[uniqueId] ? localState[uniqueId].events : []}
+              tempState={eventCreator.event}
+            />
+          );
+        })}
+
+        {eventCreator.show ? (
+          <EventCreator
+            key={eventCreator.event?.id}
+            id={eventCreator.event?.id}
+            style={eventCreator.style}
+            event={eventCreator.event}
+            placeholder={"Enter here"}
+            setEventCreator={setEventCreator}
+            onClose={() => setEventCreator({})}
+            onSubmit={(data) => {
+              setLocalState((prev) => {
+                const id = data.id;
+
+                if (!prev[id]) {
+                  prev[id] = { events: [] };
+                }
+
+                prev[id].events.push(data);
+
+                return { ...prev };
+              });
+              setEventCreator({});
+            }}
           />
-        ))}
+        ) : null}
       </AnimatedCalendar>
     </CalendarContainerStyled>
   );
