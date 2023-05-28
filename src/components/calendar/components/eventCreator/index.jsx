@@ -52,7 +52,7 @@ const timeNew = new Array(24)
 
 export default function EventCreator({
   value,
-  placeholder = "No Title",
+  placeholder,
   onClose,
   onSubmit,
   style,

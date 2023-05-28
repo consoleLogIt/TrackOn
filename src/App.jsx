@@ -5,8 +5,8 @@ import Sidebar from "./components/sidebar";
 import ContextProvider from "./context";
 
 export default function App() {
-  const [layout, setLayout] = useState({ display: "Day", value: "day" });
-  const [localState, setLocalState] = useState({
+  const [layout, setLayout] = useState({ display: "Week", value: "week" });
+  const [localState, setLocalState] = useState([
     // "18_3_2023": {
     //   events: [
     //     {
@@ -27,7 +27,7 @@ export default function App() {
     //     { title: "Some text", timeRange: ["10:30", "18:15"], color: "blue" },
     //   ],
     // },
-  });
+  ]);
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
