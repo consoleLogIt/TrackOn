@@ -32,3 +32,19 @@ export const ColorItemStyled = styled.div`
   border: ${({ active }) => (active ? `2px solid ${greyBorder}` : "none")};
   cursor: pointer;
 `;
+
+export const SelectStyled = styled.select`
+  padding: 0.2rem 0.5em;
+  font-size: 1.2rem;
+`;
+
+export const ButtonsWrapperStyled = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
+export const TimeSelectorWrapperStyled = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items:center;
+`;

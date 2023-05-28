@@ -37,6 +37,8 @@ export default function Calendar({ layout, localState, setLocalState }) {
     style: {},
   });
 
+  console.log({ eventCreator });
+
   const [springs, api] = useSpring(() => ({ from: { x: 0 } }));
 
   const AnimatedCalendar = animated(CalendarDaysWrapperStyled);
@@ -114,7 +116,7 @@ export default function Calendar({ layout, localState, setLocalState }) {
     }
   };
 
-  const handleOnClick = (e, id, time) => {
+  const handleOnClick = (e, event) => {
     const elem = e.target;
 
     const parentContainer = calendarContainerRef.current;
@@ -122,18 +124,32 @@ export default function Calendar({ layout, localState, setLocalState }) {
     const targetRect = elem.getBoundingClientRect();
     const parentRect = parentContainer.getBoundingClientRect();
 
+    console.log({ event });
+
     setEventCreator({
       show: true,
       style: {
         top: targetRect.top - parentRect.top,
         left: targetRect.left - parentRect.left,
       },
-      event: {
-        id,
-        timeRange: [`${time}:00`, `${time + 1}:00`],
-        color: "blue",
-      },
+      event,
     });
+  };
+
+  const handleOnSubmit = (data) => {
+    setLocalState((prev) => {
+      const index = prev.findIndex((d) => d.id === data.id);
+
+      if (index === -1) {
+        prev.push(data);
+      } else {
+        prev[index] = data;
+      }
+
+      return [...prev];
+    });
+
+    setEventCreator({});
   };
 
   const fromIndex =
@@ -202,8 +218,12 @@ export default function Calendar({ layout, localState, setLocalState }) {
               onClick={handleOnClick}
               onCloseCreator={() => setEventCreator(false)}
               active={eventCreator.show ? eventCreator.event?.id : false}
-              events={localState[uniqueId] ? localState[uniqueId].events : []}
-              tempState={eventCreator.event}
+              events={localState.filter((d) => d.date === uniqueId)}
+              tempState={
+                eventCreator?.event?.date === uniqueId
+                  ? eventCreator.event
+                  : undefined
+              }
             />
           );
         })}
@@ -217,20 +237,7 @@ export default function Calendar({ layout, localState, setLocalState }) {
             placeholder={"Enter here"}
             setEventCreator={setEventCreator}
             onClose={() => setEventCreator({})}
-            onSubmit={(data) => {
-              setLocalState((prev) => {
-                const id = data.id;
-
-                if (!prev[id]) {
-                  prev[id] = { events: [] };
-                }
-
-                prev[id].events.push(data);
-
-                return { ...prev };
-              });
-              setEventCreator({});
-            }}
+            onSubmit={handleOnSubmit}
           />
         ) : null}
       </AnimatedCalendar>

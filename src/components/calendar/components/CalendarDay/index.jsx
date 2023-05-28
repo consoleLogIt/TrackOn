@@ -1,4 +1,7 @@
 import React from "react";
+
+import { v4 as uuidv4 } from "uuid";
+
 import { greyBorder, greyDisabled, redOrange, white } from "../../../../colors";
 import {
   CalendarDayContainerStyled,
@@ -6,23 +9,58 @@ import {
   DayStyled,
   TimeBlockContainerStyled,
 } from "./styled";
-import EventCreator from "../eventCreator";
-import Event from "../eventBlock";
 import EventBlock from "../eventBlock";
 
-const getTimeDisplay = (time) => {
+const formatTime = (timeString) => {
+  // time format, 01:00
+
+  if (typeof timeString !== "string") {
+    return { hrs: timeString, mins: 0 };
+  }
+
+  const split = timeString.split(":");
+
+  return { hrs: parseInt(split[0]), mins: parseFloat(split[1]) };
+};
+
+export const getTimeDisplay = (time) => {
   if (time < 12) {
-    if (time === 0) return "";
+    if (time === 0) return "12 AM";
     return `${time} AM`;
   } else {
-    if (time === 12) return `${12} PM`;
+    if (time === 12) return `12 PM`;
     return `${time % 12} PM`;
   }
 };
 
+export const getTimeDisplayNew = (time) => {
+  const { hrs, mins } = formatTime(time);
+
+  if (hrs < 12) {
+    if (hrs === 0) return `12:${mins === 0 ? "00" : mins} AM`;
+    return `${hrs}:${mins === 0 ? "00" : mins} AM`;
+  } else {
+    if (hrs === 12) return `12:${mins === 0 ? "00" : mins} PM`;
+    return `${hrs % 12}:${mins === 0 ? "00" : mins} PM`;
+  }
+};
+
+export const getTimeValue = (time) => {};
+
 const time = new Array(24)
   .fill(1)
   .map((d, i) => ({ display: getTimeDisplay(i), value: i }));
+
+
+  const getOffset  = (Y) => 
+   {
+
+
+   if(Y<10) return '00';
+   if(Y>=10 && Y<20) return '15'
+   if(Y>=20 && Y<30) return '30'
+   if(Y>=30) return '45'
+   }
 
 const TimeBlock = ({
   borderTop,
@@ -33,10 +71,40 @@ const TimeBlock = ({
   onClick,
   id,
 }) => {
+  // const handleOnClick = (e) => {
+
+  //   console.log({ X: e.nativeEvent.offsetX, Y: e.nativeEvent.offsetY});
+  // };
+
+  const handleOnClick = (e) => {
+
+    const Y = e.nativeEvent.offsetY
+
+    const offset = getOffset(Y)
+
+
+    console.log({ThisY:Y})
+
+
+
+
+
+    const event = {
+      title: "",
+      color: "blue",
+      id: uuidv4(),
+      timeRange: [`${time.value}:${offset}`, `${time.value + 1}:${offset}`],
+      date: id,
+    };
+
+    onClick(e, event);
+  };
+
   return (
     <TimeBlockContainerStyled
       id={id}
-      onClick={(e) => onClick(e, id, time.value)}
+      onClick={handleOnClick}
+      // onClick={handleOnClick}
       active={active}
       borderTop={borderTop}
     >
@@ -80,14 +148,6 @@ const TimeBlock = ({
   );
 };
 
-const formatTime = (timeString) => {
-  // time format, 01:00
-
-  const split = timeString.split(":");
-
-  return { hrs: parseInt(split[0]), mins: parseInt(split[1]) };
-};
-
 const getPostion = (timeRange) => {
   const start = formatTime(timeRange[0]);
   const end = formatTime(timeRange[1]);
@@ -102,8 +162,6 @@ const getPostion = (timeRange) => {
 
   return { top, height };
 };
-
-// const events  = [{time:10},{time:12},{time:5},{time:18}]
 
 export default function CalendarDay({
   day,
@@ -145,15 +203,21 @@ export default function CalendarDay({
               title={d.title}
               timeRange={d.timeRange}
               color={d.color}
+              onClick={onClick}
+              id={d.id}
+              date={d.date}
+              type={d.type}
             />
           ))}
 
-          {tempState && tempState.id === id ? (
+          {tempState ? (
             <EventBlock
               style={{ ...getPostion(tempState.timeRange) }}
               title={tempState.title}
               timeRange={tempState.timeRange}
               color={tempState.color}
+              id={tempState.id}
+              onClick={onClick}
             />
           ) : null}
 

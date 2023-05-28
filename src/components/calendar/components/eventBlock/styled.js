@@ -18,6 +18,8 @@ export const EventContainerStyled = styled.div`
   width: 80%;
   padding: 0 0.5rem;
   border: 2px solid ${({color})=>eventColors[color]};
+  /* box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.2); */
+
 `;
 
 export const EventTitleStyled = styled.div`

@@ -4,17 +4,39 @@ import {
   EventTimeStyled,
   EventTitleStyled,
 } from "./styled";
+import { getTimeDisplayNew } from "../CalendarDay";
 
-export default function EventBlock({ title, timeRange, style, color }) {
+export default function EventBlock({
+  title,
+  timeRange,
+  style,
+  color,
+  onClick,
+  id,
+  date,
+  type
+}) {
+  const handleOnClick = (e) => {
+    const event = {
+      title,
+      color,
+      id,
+      type,
+      timeRange: timeRange,
+      date,
+    };
+
+    onClick(e, event);
+  };
+
   return (
-    <EventContainerStyled {...style} color={color}>
+    <EventContainerStyled {...style} color={color} onClick={handleOnClick}>
       <EventTitleStyled>{title}</EventTitleStyled>
       <EventTimeStyled>
-        {`${timeRange[0]} -- ${timeRange[1]}`}
+        {`${getTimeDisplayNew(timeRange[0])} -- ${getTimeDisplayNew(
+          timeRange[1]
+        )}`}
       </EventTimeStyled>
     </EventContainerStyled>
   );
 }
-
-
-
