@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   EventContainerStyled,
   EventTimeStyled,
   EventTitleStyled,
 } from "./styled";
 import { getTimeDisplayNew } from "../CalendarDay";
+import { useDrag } from "react-dnd";
+import { getEmptyImage } from "react-dnd-html5-backend";
 
 export default function EventBlock({
   title,
@@ -14,8 +16,20 @@ export default function EventBlock({
   onClick,
   id,
   date,
-  type
+  type,
 }) {
+  const eventRef = useRef();
+  const event = { title, id, color, timeRange, date, type };
+  const [{ dragging }, drag, preview] = useDrag({
+    type: "event",
+    item: { event, eventRef },
+    collect: (monitor) => ({ dragging: monitor.isDragging() }),
+  });
+
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, []);
+
   const handleOnClick = (e) => {
     const event = {
       title,
@@ -30,7 +44,13 @@ export default function EventBlock({
   };
 
   return (
-    <EventContainerStyled {...style} color={color} onClick={handleOnClick}>
+    <EventContainerStyled
+      dragging={dragging}
+      ref={drag(eventRef)}
+      {...style}
+      color={color}
+      onClick={handleOnClick}
+    >
       <EventTitleStyled>{title}</EventTitleStyled>
       <EventTimeStyled>
         {`${getTimeDisplayNew(timeRange[0])} -- ${getTimeDisplayNew(

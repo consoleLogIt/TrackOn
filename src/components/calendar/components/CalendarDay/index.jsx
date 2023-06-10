@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -10,6 +10,8 @@ import {
   TimeBlockContainerStyled,
 } from "./styled";
 import EventBlock from "../eventBlock";
+import { useDrop } from "react-dnd";
+import { CustomDragLayer, snapToGrid } from "../CustomDrag";
 
 const formatTime = (timeString) => {
   // time format, 01:00
@@ -51,50 +53,25 @@ const time = new Array(24)
   .fill(1)
   .map((d, i) => ({ display: getTimeDisplay(i), value: i }));
 
+const getOffset = (Y) => {
+  if (Y < 10) return "00";
+  if (Y >= 10 && Y < 20) return "15";
+  if (Y >= 20 && Y < 30) return "30";
+  if (Y >= 30) return "45";
+};
 
-  const getOffset  = (Y) => 
-   {
-
-
-   if(Y<10) return '00';
-   if(Y>=10 && Y<20) return '15'
-   if(Y>=20 && Y<30) return '30'
-   if(Y>=30) return '45'
-   }
-
-const TimeBlock = ({
-  borderTop,
-  time,
-  showTime,
-  today,
-  active,
-  onClick,
-  id,
-}) => {
-  // const handleOnClick = (e) => {
-
-  //   console.log({ X: e.nativeEvent.offsetX, Y: e.nativeEvent.offsetY});
-  // };
-
+const TimeBlock = ({ borderTop, time, showTime, today, onClick, date }) => {
   const handleOnClick = (e) => {
+    const Y = e.nativeEvent.offsetY;
 
-    const Y = e.nativeEvent.offsetY
-
-    const offset = getOffset(Y)
-
-
-    console.log({ThisY:Y})
-
-
-
-
+    const offset = getOffset(Y);
 
     const event = {
       title: "",
       color: "blue",
       id: uuidv4(),
       timeRange: [`${time.value}:${offset}`, `${time.value + 1}:${offset}`],
-      date: id,
+      date,
     };
 
     onClick(e, event);
@@ -102,10 +79,8 @@ const TimeBlock = ({
 
   return (
     <TimeBlockContainerStyled
-      id={id}
+      id={date}
       onClick={handleOnClick}
-      // onClick={handleOnClick}
-      active={active}
       borderTop={borderTop}
     >
       {showTime ? (
@@ -148,13 +123,15 @@ const TimeBlock = ({
   );
 };
 
-const getPostion = (timeRange) => {
+export const getPostion = (timeRange) => {
   const start = formatTime(timeRange[0]);
   const end = formatTime(timeRange[1]);
 
+  console.log({ start, end });
+
   // calculate top
 
-  const top = start.hrs * 4 + (start.mins / 60) * 4;
+  const top = start.hrs * 4 + (start.mins / 60) * 4; // divide by 60 to convert into hrs
 
   // calculate height
 
@@ -165,8 +142,6 @@ const getPostion = (timeRange) => {
 
 export default function CalendarDay({
   day,
-  active,
-  onClick,
   week,
   disabled,
   today,
@@ -175,13 +150,71 @@ export default function CalendarDay({
   id,
   events,
   tempState,
+  setEventCreator,
+  getParentBoundingRect,
+  handleUpdateOneEvent,
 }) {
+  const timeBlockContainerRef = useRef();
+
+  const getBoundingRect = () => {
+    return timeBlockContainerRef.current.getBoundingClientRect();
+  };
+
+  const handleOnClickNew = (e, event) => {
+    const parentContainer = timeBlockContainerRef.current;
+    const elem = e.target;
+
+    const timeBlockContainerRect = parentContainer.getBoundingClientRect();
+    const parentRect = getParentBoundingRect();
+
+    const targetRect = elem.getBoundingClientRect();
+
+    setEventCreator({
+      show: true,
+      style: {
+        top: targetRect.top - timeBlockContainerRect.top,
+        left: timeBlockContainerRect.left - parentRect.left,
+      },
+      event,
+    });
+  };
+
+  const [{ isOver }, drop] = useDrop({
+    accept: "event",
+    drop: (item, monitor) => {
+      const { x, y } = monitor.getSourceClientOffset();
+      const parentY = getBoundingRect().top;
+
+      const { snappedX, snappedY } = snapToGrid(x, y);
+
+      const targetY = Math.floor((snappedY - parentY) / 10);
+
+      const hrs = Math.floor(targetY / 4);
+      const mins = ((targetY % 4) / 4) * 60;
+
+      const time1 = formatTime(item.event.timeRange[0]);
+      const time2 = formatTime(item.event.timeRange[1]);
+
+      const newTime1 = { hrs: hrs, mins: mins };
+      const newTime2 = { hrs: time2.hrs -time1.hrs + hrs, mins: time2.mins - time2.mins + mins };
+
+      const newTimeRange = [
+        `${newTime1.hrs}:${newTime1.mins}`,
+        `${newTime2.hrs}:${newTime2.mins}`,
+      ];
+
+      item.event.timeRange = newTimeRange;
+
+      console.log({ newTimeRange, hrs, mins, targetY, newTime2 });
+
+      handleUpdateOneEvent(item.event);
+    },
+
+    collect: (monitor) => ({ isOver: monitor.isOver() }),
+  });
+
   return (
-    // <div style={{ position: "relative" }}>
-    <CalendarDayContainerStyled
-      active={active === id}
-      onClick={showTimeDivision ? null : (e) => onClick(e, id)}
-    >
+    <CalendarDayContainerStyled active={isOver}>
       <MetaBlockStyled disabled={disabled}>
         <DayStyled disabled={disabled} today={today}>
           {day}
@@ -197,40 +230,44 @@ export default function CalendarDay({
             flexDirection: "column",
           }}
         >
-          {events.map((d) => (
-            <EventBlock
-              style={{ ...getPostion(d.timeRange) }}
-              title={d.title}
-              timeRange={d.timeRange}
-              color={d.color}
-              onClick={onClick}
-              id={d.id}
-              date={d.date}
-              type={d.type}
-            />
-          ))}
+          {" "}
+          <div ref={drop(timeBlockContainerRef)}>
+            {events.map((d) => (
+              <EventBlock
+                style={{ ...getPostion(d.timeRange) }}
+                title={d.title}
+                timeRange={d.timeRange}
+                color={d.color}
+                onClick={handleOnClickNew}
+                id={d.id}
+                date={d.date}
+                type={d.type}
+              />
+            ))}
 
-          {tempState ? (
-            <EventBlock
-              style={{ ...getPostion(tempState.timeRange) }}
-              title={tempState.title}
-              timeRange={tempState.timeRange}
-              color={tempState.color}
-              id={tempState.id}
-              onClick={onClick}
-            />
-          ) : null}
+            {tempState ? (
+              <EventBlock
+                style={{ ...getPostion(tempState.timeRange) }}
+                title={tempState.title}
+                timeRange={tempState.timeRange}
+                color={tempState.color}
+                id={tempState.id}
+                onClick={handleOnClickNew}
+              />
+            ) : null}
 
-          {time.map((d, i) => (
-            <TimeBlock
-              id={`${id}`}
-              showTime={showTime}
-              today={today}
-              time={d}
-              borderTop={i === 0}
-              onClick={onClick}
-            />
-          ))}
+            {time.map((d, i) => (
+              <TimeBlock
+                date={`${id}`}
+                showTime={showTime}
+                today={today}
+                time={d}
+                borderTop={i === 0}
+                onClick={handleOnClickNew}
+              />
+            ))}
+          </div>
+          <CustomDragLayer getParentBoundingRect={getBoundingRect} date={id} />
         </div>
       ) : null}
     </CalendarDayContainerStyled>

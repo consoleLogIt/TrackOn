@@ -9,12 +9,13 @@ import { eventColors } from "../../../../colors";
 export const EventContainerStyled = styled.div`
   position: absolute;
   height: ${({ height }) => height + "rem"};
+  opacity: ${({dragging})=>dragging?0.5:1};
   top: ${({ top }) => top + "rem"};
   background-color: ${({color})=>eventColors[color]};
   z-index: 4;
   border-radius: 2px;
   color: white;
-  align-self: end;
+  right: 0;
   width: 80%;
   padding: 0 0.5rem;
   border: 2px solid ${({color})=>eventColors[color]};
