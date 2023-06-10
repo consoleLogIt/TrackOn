@@ -13,15 +13,15 @@ export const CalendarDayContainerStyled = styled.div`
   min-height: 11.5rem;
   cursor: pointer;
   height: 100%;
-  /* background-color: ${({ active }) => (active ? "lightblue" : white)}; */
+  background-color: ${({ active }) => (active ? "lightblue" : white)};
 `;
 
 export const TimeBlockContainerStyled = styled.div`
   border-bottom: 1px solid ${greyBorder};
+  
   border-top: ${({ borderTop }) =>
     borderTop ? `1px solid ${greyBorder}` : null};
   height: 4rem;
-  position: relative;
   /* padding: 0.5rem; */
   background-color: ${({ active }) => (active ? "lightblue" : white)};
 

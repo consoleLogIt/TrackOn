@@ -61,7 +61,7 @@ export default function EventCreator({
   setEventCreator,
 }) {
   const [springObj, setSpringObj] = useState({
-    from: { x: 170 },
+    from: { x: 150 },
     to: { x: 200 },
   });
   const eventData = event;

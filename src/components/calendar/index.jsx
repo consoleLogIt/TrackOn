@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import Button from "../buttons";
 import CalendarDay from "./components/CalendarDay";
+
 import {
   CalendarContainerStyled,
   CalendarDaysWrapperStyled,
@@ -11,6 +12,7 @@ import { animated, useSpring } from "@react-spring/web";
 import EventCreator from "./components/eventCreator";
 import { weeks } from "./constants";
 import { getText, getMonthAndYear, isEqualDate } from "./utils";
+import { CustomDragLayer } from "./components/CustomDrag";
 
 export default function Calendar({ layout, localState, setLocalState }) {
   const calendarInstance = new CalenderConstructor({ siblingMonths: true });
@@ -36,8 +38,6 @@ export default function Calendar({ layout, localState, setLocalState }) {
     event: {},
     style: {},
   });
-
-  console.log({ eventCreator });
 
   const [springs, api] = useSpring(() => ({ from: { x: 0 } }));
 
@@ -116,24 +116,8 @@ export default function Calendar({ layout, localState, setLocalState }) {
     }
   };
 
-  const handleOnClick = (e, event) => {
-    const elem = e.target;
-
-    const parentContainer = calendarContainerRef.current;
-
-    const targetRect = elem.getBoundingClientRect();
-    const parentRect = parentContainer.getBoundingClientRect();
-
-    console.log({ event });
-
-    setEventCreator({
-      show: true,
-      style: {
-        top: targetRect.top - parentRect.top,
-        left: targetRect.left - parentRect.left,
-      },
-      event,
-    });
+  const getParentBoundingRect = () => {
+    return calendarContainerRef.current.getBoundingClientRect();
   };
 
   const handleOnSubmit = (data) => {
@@ -152,6 +136,12 @@ export default function Calendar({ layout, localState, setLocalState }) {
     setEventCreator({});
   };
 
+  const handleUpdateOneEvent = (event) => {
+    console.log({ event });
+
+    setLocalState((prev) => [...prev.filter((d) => d.id !== event.id), event]);
+  };
+
   const fromIndex =
     layout.value === "day"
       ? currentIndex
@@ -165,7 +155,7 @@ export default function Calendar({ layout, localState, setLocalState }) {
       ? fromIndex + 7
       : undefined;
 
-  // console.log({ monthDays, toIndex, fromIndex });
+  console.log({ eventCreator });
 
   return (
     <CalendarContainerStyled>
@@ -192,17 +182,19 @@ export default function Calendar({ layout, localState, setLocalState }) {
         </animated.h2>
       </CalendarHeaderStyled>
 
-      <AnimatedCalendar
+      <CalendarDaysWrapperStyled
         ref={calendarContainerRef}
         day={layout.value === "day"}
-        style={springs}
+        // style={springs}
       >
         {monthDays.slice(fromIndex, toIndex).map((d, i) => {
           const uniqueId = `${d.day}_${d.month}_${d.year}`;
 
           return (
             <CalendarDay
+              getParentBoundingRect={getParentBoundingRect}
               week={weeks[d.weekDay]}
+              handleUpdateOneEvent={handleUpdateOneEvent}
               showTimeDivision={
                 layout.value === "week" || layout.value === "day"
               }
@@ -215,9 +207,8 @@ export default function Calendar({ layout, localState, setLocalState }) {
                 month: today.getMonth(),
                 year: today.getFullYear(),
               })}
-              onClick={handleOnClick}
               onCloseCreator={() => setEventCreator(false)}
-              active={eventCreator.show ? eventCreator.event?.id : false}
+              setEventCreator={setEventCreator}
               events={localState.filter((d) => d.date === uniqueId)}
               tempState={
                 eventCreator?.event?.date === uniqueId
@@ -227,6 +218,8 @@ export default function Calendar({ layout, localState, setLocalState }) {
             />
           );
         })}
+
+        {/* <CustomDragLayer /> */}
 
         {eventCreator.show ? (
           <EventCreator
@@ -240,7 +233,7 @@ export default function Calendar({ layout, localState, setLocalState }) {
             onSubmit={handleOnSubmit}
           />
         ) : null}
-      </AnimatedCalendar>
+      </CalendarDaysWrapperStyled>
     </CalendarContainerStyled>
   );
 }
