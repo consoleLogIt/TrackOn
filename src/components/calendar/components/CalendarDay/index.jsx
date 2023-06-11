@@ -11,7 +11,7 @@ import {
 } from "./styled";
 import EventBlock from "../eventBlock";
 import { useDrop } from "react-dnd";
-import { CustomDragLayer, snapToGrid } from "../CustomDrag";
+import { CustomDragLayer, snapY } from "../CustomDrag";
 
 const formatTime = (timeString) => {
   // time format, 01:00
@@ -185,7 +185,7 @@ export default function CalendarDay({
       const { x, y } = monitor.getSourceClientOffset();
       const parentY = getBoundingRect().top;
 
-      const { snappedX, snappedY } = snapToGrid(x, y);
+      const snappedY = snapY(y);
 
       const targetY = Math.floor((snappedY - parentY) / 10);
 
@@ -196,7 +196,10 @@ export default function CalendarDay({
       const time2 = formatTime(item.event.timeRange[1]);
 
       const newTime1 = { hrs: hrs, mins: mins };
-      const newTime2 = { hrs: time2.hrs -time1.hrs + hrs, mins: time2.mins - time2.mins + mins };
+      const newTime2 = {
+        hrs: time2.hrs - time1.hrs + hrs,
+        mins: time2.mins - time2.mins + mins,
+      };
 
       const newTimeRange = [
         `${newTime1.hrs}:${newTime1.mins}`,
@@ -204,8 +207,7 @@ export default function CalendarDay({
       ];
 
       item.event.timeRange = newTimeRange;
-
-      console.log({ newTimeRange, hrs, mins, targetY, newTime2 });
+      item.event.date = id;
 
       handleUpdateOneEvent(item.event);
     },
@@ -214,7 +216,7 @@ export default function CalendarDay({
   });
 
   return (
-    <CalendarDayContainerStyled active={isOver}>
+    <CalendarDayContainerStyled>
       <MetaBlockStyled disabled={disabled}>
         <DayStyled disabled={disabled} today={today}>
           {day}
@@ -267,7 +269,10 @@ export default function CalendarDay({
               />
             ))}
           </div>
-          <CustomDragLayer getParentBoundingRect={getBoundingRect} date={id} />
+          <CustomDragLayer
+            getParentBoundingRect={getBoundingRect}
+            isOver={isOver}
+          />
         </div>
       ) : null}
     </CalendarDayContainerStyled>
