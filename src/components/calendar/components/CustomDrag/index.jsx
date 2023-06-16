@@ -4,7 +4,7 @@ import { getPostion } from "../CalendarDay";
 // import { v4 as uuidv4 } from "uuid";
 
 export function snapY(y) {
-return Math.round(y / 10) * 10;
+  return Math.round(y / 10) * 10;
 }
 
 const DragPreview = ({ event, style }) => {
@@ -37,11 +37,9 @@ export const CustomDragLayer = (props) => {
 
   let { x, y } = currentOffset;
   const parentY = props.getParentBoundingRect().top;
-  const snappedY  = snapY(y);
+  const snappedY = snapY(y);
 
   const position = getPostion(item.event.timeRange);
-
-  console.log({ thisY: y, snappedY, x, parentY });
 
   const style = { top: (snappedY - parentY) / 10, height: position.height };
 

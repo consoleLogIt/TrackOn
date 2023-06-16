@@ -47,8 +47,6 @@ export const getTimeDisplayNew = (time) => {
   }
 };
 
-export const getTimeValue = (time) => {};
-
 const time = new Array(24)
   .fill(1)
   .map((d, i) => ({ display: getTimeDisplay(i), value: i }));
@@ -95,37 +93,44 @@ const TimeBlock = ({ borderTop, time, showTime, today, onClick, date }) => {
             width: "100%",
             top: `${(new Date().getMinutes() * 5) / 3}%`, // 5/3 === 1min
 
-            textAlign: "right",
+            // textAlign: "right",
           }}
         >
-          <div
-            style={{
-              height: "1px",
-              backgroundColor: redOrange,
-            }}
-          ></div>
-          <div
-            style={{
-              borderRadius: "50%",
-              height: "1rem",
-              width: "1rem",
-              marginTop: "-5px",
-              backgroundColor: redOrange,
-              position: "relative",
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <div
+              style={{
+                borderRadius: "50%",
+                height: "1.2rem",
+                width: "1.2rem",
+                backgroundColor: redOrange,
+                marginLeft:"-.7rem"
 
-              float: "right",
-              zIndex: "2",
-            }}
-          ></div>
+                // float: "right",
+                // zIndex: "2",
+              }}
+            ></div>
+            <div
+              style={{
+                height: "1.6px",
+                flexGrow: 1,
+                backgroundColor: redOrange,
+              }}
+            ></div>
+          </div>
         </div>
       ) : null}
     </TimeBlockContainerStyled>
   );
 };
 
-export const getPostion = (timeRange) => {
+const getTimeFromTimerange = (timeRange) => {
   const start = formatTime(timeRange[0]);
   const end = formatTime(timeRange[1]);
+  return { start, end };
+};
+
+export const getPostion = (timeRange) => {
+  const { start, end } = getTimeFromTimerange(timeRange);
 
   console.log({ start, end });
 
@@ -179,37 +184,67 @@ export default function CalendarDay({
     });
   };
 
+  const getTimeFromTop = (Y) => {
+    return { hrs: Math.floor(Y / 4), mins: ((Y % 4) / 4) * 60 };
+  };
+
+  const addTime = (time1, time2) => {
+    const hrs1 = time1.hrs + time1.mins / 60;
+    const hrs2 = time2.hrs + time2.mins / 60;
+
+    const addedHrs = hrs1 + hrs2;
+
+    return { hrs: Math.floor(addedHrs), mins: (addedHrs % 1) * 60 };
+  };
+
+  const subtractTime = (time1, time2) => {
+    const hrs1 = time1.hrs + time1.mins / 60;
+    const hrs2 = time2.hrs + time2.mins / 60;
+
+    const subtractedHrs = Math.abs(hrs1 - hrs2);
+
+    return { hrs: Math.floor(subtractedHrs), mins: (subtractedHrs % 1) * 60 };
+  };
+
   const [{ isOver }, drop] = useDrop({
     accept: "event",
     drop: (item, monitor) => {
+      const event = item.event;
       const { x, y } = monitor.getSourceClientOffset();
       const parentY = getBoundingRect().top;
 
       const snappedY = snapY(y);
 
-      const targetY = Math.floor((snappedY - parentY) / 10);
+      const targetY = Math.floor((snappedY - parentY) / 10); // covert to rem;
 
-      const hrs = Math.floor(targetY / 4);
-      const mins = ((targetY % 4) / 4) * 60;
+      let { hrs, mins } = getTimeFromTop(targetY);
 
-      const time1 = formatTime(item.event.timeRange[0]);
-      const time2 = formatTime(item.event.timeRange[1]);
+      // handle two condition
+      // 1. drag up -> if goes negative then set to 0
+      // 2. drag down -> if goes beyound
 
-      const newTime1 = { hrs: hrs, mins: mins };
-      const newTime2 = {
-        hrs: time2.hrs - time1.hrs + hrs,
-        mins: time2.mins - time2.mins + mins,
+      const { start, end } = getTimeFromTimerange(event.timeRange);
+
+      const newStart = { hrs: hrs, mins: mins };
+      const timeDiff = subtractTime(start, end);
+      const newEnd = {
+        ...addTime(timeDiff, { hrs, mins }),
       };
 
+      console.log({ newEnd });
+
       const newTimeRange = [
-        `${newTime1.hrs}:${newTime1.mins}`,
-        `${newTime2.hrs}:${newTime2.mins}`,
+        `${newStart.hrs}:${newStart.mins === 0 ? "00" : newStart.mins}`,
+        `${newEnd.hrs}:${newEnd.mins === 0 ? "00" : newEnd.mins}`,
       ];
 
       item.event.timeRange = newTimeRange;
       item.event.date = id;
 
-      handleUpdateOneEvent(item.event);
+      if (hrs >= 0 && newEnd.hrs < 25) {
+        // todo drag down => let it go to the 12 am
+        handleUpdateOneEvent(item.event);
+      }
     },
 
     collect: (monitor) => ({ isOver: monitor.isOver() }),
