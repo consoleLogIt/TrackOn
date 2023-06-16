@@ -18,6 +18,7 @@ export const CalendarDayContainerStyled = styled.div`
 
 export const TimeBlockContainerStyled = styled.div`
   border-bottom: 1px solid ${greyBorder};
+  position: relative;
   
   border-top: ${({ borderTop }) =>
     borderTop ? `1px solid ${greyBorder}` : null};

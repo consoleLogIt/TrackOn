@@ -11,6 +11,7 @@ export const EventCreatorContainerStyled = styled.div`
 
   top: ${({ top }) => top + "px"};
   left: ${({ left }) => left + "px"};
+  visibility: ${({visibility})=>visibility};
 
   /* left: 50%; */
   background: white;

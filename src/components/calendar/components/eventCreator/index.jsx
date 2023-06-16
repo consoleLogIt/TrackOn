@@ -61,8 +61,8 @@ export default function EventCreator({
   setEventCreator,
 }) {
   const [springObj, setSpringObj] = useState({
-    from: { x: 150 },
-    to: { x: 200 },
+    from: { x: 0, opacity: 0 },
+    to: { x: 0, opacity: 1 }, // some how this is working even if i dont do this opacity thing at the bottom
   });
   const eventData = event;
 
@@ -91,14 +91,28 @@ export default function EventCreator({
 
   useEffect(() => {
     const screenWidth = screen.width;
-    const right = ref.current.getBoundingClientRect().right;
+    const screenHeight = screen.height;
 
-    if (right > screenWidth) {
-      setSpringObj({
-        from: { x: -80 },
-        to: { x: -100 },
-      });
+    const { right, bottom, left } = ref.current.getBoundingClientRect();
+
+    console.log({ screenWidth, right });
+
+    const springObj = { from: { x: 150 }, to: { x: 200 } };
+
+    if (right > screenWidth -200) { // because of 200 tranlate on right
+      springObj.from.x *= -1;
+      springObj.to.x  = left-right ; // event creator width
     }
+
+    console.log({bottom:ref.current.getBoundingClientRect(), screenHeight})
+
+    if (bottom > screenHeight) {
+      springObj.to.y = screenHeight-bottom;
+    }
+
+    console.log({springObj})
+
+    setSpringObj(springObj);
   }, []);
 
   const spring = useSpring(springObj);
