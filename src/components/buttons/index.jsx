@@ -1,15 +1,15 @@
-import { ArrowLeft, ArrowRight, Plus } from "phosphor-react";
+import { ArrowLeft, ArrowRight, Plus, Trash } from "phosphor-react";
 import React from "react";
 import { ButtonContainerStyled } from "./styled";
 
-const icons = { ArrowLeft: ArrowLeft, ArrowRight: ArrowRight, Plus: Plus };
+const icons = { ArrowLeft: ArrowLeft, ArrowRight: ArrowRight, Plus: Plus, Trash:Trash };
 
 export default function Button({
   onClick,
   children,
   icon,
   bgColor,
-  textColor,
+  textColor
 }) {
   const IconComp = icons[icon];
   const composition = icon && children ? "text+icon" : icon ? "icon" : "text";

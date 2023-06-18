@@ -122,13 +122,14 @@ export default function Calendar({ layout, localState, setLocalState }) {
 
   const handleOnSubmit = (data) => {
     setLocalState((prev) => {
+      if (data.temp) {
+        delete data.temp;
+        return prev.concat(data);
+      }
+
       const index = prev.findIndex((d) => d.id === data.id);
 
-      if (index === -1) {
-        prev.push(data);
-      } else {
-        prev[index] = data;
-      }
+      prev[index] = data;
 
       return [...prev];
     });
@@ -140,6 +141,10 @@ export default function Calendar({ layout, localState, setLocalState }) {
     console.log({ event });
 
     setLocalState((prev) => [...prev.filter((d) => d.id !== event.id), event]);
+  };
+
+  const handleDeleteEvent = (eventId) => {
+    setLocalState((prev) => prev.filter((event) => event.id !== eventId));
   };
 
   const fromIndex =
@@ -231,6 +236,7 @@ export default function Calendar({ layout, localState, setLocalState }) {
             setEventCreator={setEventCreator}
             onClose={() => setEventCreator({})}
             onSubmit={handleOnSubmit}
+            handleDeleteEvent={handleDeleteEvent}
           />
         ) : null}
         {/* <div style={{padding:"10rem"}}></div> */}
