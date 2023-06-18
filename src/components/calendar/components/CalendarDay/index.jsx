@@ -66,10 +66,12 @@ const TimeBlock = ({ borderTop, time, showTime, today, onClick, date }) => {
 
     const event = {
       title: "",
+      type:{display:"Event",value:"event"},
       color: "blue",
       id: uuidv4(),
       timeRange: [`${time.value}:${offset}`, `${time.value + 1}:${offset}`],
       date,
+      temp:true
     };
 
     onClick(e, event);
@@ -179,6 +181,7 @@ export default function CalendarDay({
       style: {
         top: targetRect.top - timeBlockContainerRect.top,
         left: timeBlockContainerRect.left - parentRect.left,
+        // right: timeBlockContainerRect.right-parentRect.left
       },
       event,
     });

@@ -7,13 +7,13 @@ import {
   ChooseColorContainerStyled,
   ColorItemStyled,
   EventCreatorContainerStyled,
-  SelectStyled,
   TimeSelectorWrapperStyled,
 } from "./styled";
 import { animated, useSpring } from "@react-spring/web";
 import { eventColors, greyDarker } from "../../../../colors";
 import Dropdown from "../../../dropdown";
 import { getTimeDisplay, getTimeDisplayNew } from "../CalendarDay";
+import { EVENT_TYPES } from "../../../../constants";
 
 const AnimatedEventCreator = animated(EventCreatorContainerStyled);
 
@@ -59,6 +59,7 @@ export default function EventCreator({
   id,
   event,
   setEventCreator,
+  handleDeleteEvent,
 }) {
   const [springObj, setSpringObj] = useState({
     from: { x: 0, opacity: 0 },
@@ -95,22 +96,24 @@ export default function EventCreator({
 
     const { right, bottom, left } = ref.current.getBoundingClientRect();
 
+    const eventCreatorWidth = right - left;
+
     console.log({ screenWidth, right });
 
-    const springObj = { from: { x: 150 }, to: { x: 200 } };
+    const springObj = { from: { x: 150 }, to: { x:200  } };
 
-    if (right > screenWidth -200) { // because of 200 tranlate on right
+    if (right > screenWidth - 200) {
+      // because of 200 tranlate on right
       springObj.from.x *= -1;
-      springObj.to.x  = left-right ; // event creator width
+      springObj.to.x = -eventCreatorWidth; // event creator width
     }
 
-    console.log({bottom:ref.current.getBoundingClientRect(), screenHeight})
+    console.log({ bottom: ref.current.getBoundingClientRect(), screenHeight });
 
     if (bottom > screenHeight) {
-      springObj.to.y = screenHeight-bottom;
+      springObj.to.y = screenHeight - bottom;
     }
 
-    console.log({springObj})
 
     setSpringObj(springObj);
   }, []);
@@ -158,12 +161,7 @@ export default function EventCreator({
         S
         value={eventData["type"]}
         onChange={(value) => handleOnChange("type", value)}
-        options={[
-          { display: "Event", value: "event" },
-          { display: "Reminder", value: "reminder" },
-          { display: "Task", value: "task" },
-          { display: "Notes", value: "notes" },
-        ]}
+        options={EVENT_TYPES}
       />
       <ChooseColor
         value={eventData["color"]}
@@ -172,8 +170,19 @@ export default function EventCreator({
       />
 
       <ButtonsWrapperStyled>
-        <Button onClick={() => onSubmit(eventData)}>Submit</Button>
+        <Button onClick={() => onSubmit(eventData)}>Save</Button>
         <Button onClick={onClose}>Cancel</Button>
+        {!event.temp ? (
+          <div style={{ marginLeft: "auto" }}>
+            <Button
+              onClick={() => {
+                handleDeleteEvent(event.id);
+                onClose();
+              }}
+              icon="Trash"
+            ></Button>
+          </div>
+        ) : null}
       </ButtonsWrapperStyled>
     </AnimatedEventCreator>
   );
