@@ -218,7 +218,7 @@ export default function CalendarDay({
 
       const snappedY = snapY(y);
 
-      const targetY = Math.floor((snappedY - parentY) / 10); // covert to rem;
+      const targetY = Math.round((snappedY - parentY) / 10); // covert to rem;
 
       let { hrs, mins } = getTimeFromTop(targetY);
 
